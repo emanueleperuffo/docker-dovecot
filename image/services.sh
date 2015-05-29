@@ -4,11 +4,16 @@ source /build/buildconfig
 set -x
 
 ## Installing dovecot
-$minimal_apt_get_install dovecot-core dovecot-imapd dovecot-ldap \
+$minimal_apt_get_install dovecot-core dovecot-imapd dovecot-pop3d dovecot-ldap \
 	dovecot-lmtpd dovecot-sieve dovecot-managesieved
 
 ## Configuring dovecot
+mkdir /etc/dovecot/sieve
 cp /build/config/dovecot/conf.d/*.conf /etc/dovecot/conf.d/
-cp /build/config/dovecot/sieve/* /etc/dovecot/sieve/*
-cp /build/config/dovecot.conf	/etc/dovecot/
+cp /build/config/dovecot/sieve/* /etc/dovecot/sieve/
+cp /build/config/dovecot/dovecot.conf	/etc/dovecot/
 sievec /etc/dovecot/sieve/default.sieve
+
+## Enabling dovecot daemon
+mkdir /etc/service/dovecot
+cp /build/runit/dovecot /etc/service/dovecot/run

@@ -12,6 +12,8 @@ RUN /build/prepare.sh && \
 	/build/services.sh && \
 	/build/cleanup.sh
 
+VOLUME ["/etc/dovecot", "/var/mail", "/etc/ssl/dovecot"]
+
 EXPOSE 12345 143 110
 
 CMD ["/sbin/my_init"]
