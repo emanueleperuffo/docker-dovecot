@@ -17,3 +17,6 @@ sievec /etc/dovecot/sieve/default.sieve
 ## Enabling dovecot daemon
 mkdir /etc/service/dovecot
 cp /build/runit/dovecot /etc/service/dovecot/run
+
+# Creating vmail user
+groupadd vmail -g 5000 && useradd -u 5000 -g vmail vmail -d /var/mail
