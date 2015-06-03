@@ -15,6 +15,6 @@ RUN /build/prepare.sh && \
 
 VOLUME ["/mail", "/etc/ssl/dovecot"]
 
-EXPOSE 12345 143 110 4190
+EXPOSE 12345 143 110 4190 24
 
 CMD ["/sbin/my_init"]
