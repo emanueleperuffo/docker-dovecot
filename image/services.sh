@@ -19,4 +19,5 @@ mkdir /etc/service/dovecot
 cp /build/runit/dovecot /etc/service/dovecot/run
 
 # Creating vmail user
-groupadd vmail -g 5000 && useradd -u 5000 -g vmail vmail -d /var/mail
+groupadd vmail -g 5000 && useradd -u 5000 -g vmail vmail -d /mail
+mkdir /mail && chown vmail:vmail /mail

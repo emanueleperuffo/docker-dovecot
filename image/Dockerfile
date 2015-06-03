@@ -6,12 +6,14 @@ ADD . /build
 
 ENV SLAPD_HOST ldap.example.com
 ENV SLAPD_SEARCH_BASE dc=example,dc=com
+ENV SLAPD_DN cn=dovecot,dc=example,dc=com
+ENV SLAPD_DNPASS pass
 
 RUN /build/prepare.sh && \
 	/build/services.sh && \
 	/build/cleanup.sh
 
-VOLUME ["/etc/dovecot", "/var/mail", "/etc/ssl/dovecot"]
+VOLUME ["/etc/dovecot", "/mail", "/etc/ssl/dovecot"]
 
 EXPOSE 12345 143 110 4190
 
