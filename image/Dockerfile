@@ -13,7 +13,7 @@ RUN /build/prepare.sh && \
 	/build/services.sh && \
 	/build/cleanup.sh
 
-VOLUME ["/etc/dovecot", "/mail", "/etc/ssl/dovecot"]
+VOLUME ["/mail", "/etc/ssl/dovecot"]
 
 EXPOSE 12345 143 110 4190
 
