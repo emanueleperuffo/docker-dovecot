@@ -1,29 +1,35 @@
 #!/bin/sh
 set -e
 
-chmod 600 /etc/ssl/dovecot/*
+cat <<-EOF > /etc/dovecot/dovecot-ldap.conf.ext
+hosts = $SLAPD_HOST
+auth_bind = no
+dn = $SLAPD_DN
+dnpass = $SLAPD_DNPASS
+ldap_version = 3
+base = $SLAPD_SEARCH_BASE
+deref = never
+scope = subtree
+user_attrs = =home=/mail/%d/%n/, =uid=vmail, =gid=vmail
+user_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
+pass_attrs = mail=user,userPassword=password
+pass_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
+iterate_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient))
+default_pass_scheme = CRYPT
+EOF
 
-BOOTSTRAPPED="/mail/.bootstrapped"
+cat <<-EOF > /etc/dovecot/conf.d/15-lda.conf
+lda_mailbox_autocreate = yes
+protocol lda {
+	mail_plugins = $mail_plugins sieve
+	postmaster_address = $POSTMASTER
+}
+EOF
 
-if [ ! -e $BOOTSTRAPPED ]; then
-	cat <<-EOF > /etc/dovecot/dovecot-ldap.conf.ext
-	hosts = $SLAPD_HOST
-	auth_bind = no
-	dn = $SLAPD_DN
-	dnpass = $SLAPD_DNPASS
-	ldap_version = 3
-	base = $SLAPD_SEARCH_BASE
-	deref = never
-	scope = subtree
-	user_attrs = =home=/mail/%d/%n/
-	user_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
-	pass_attrs = mail=user,userPassword=password
-	pass_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
-	iterate_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient))
-	default_pass_scheme = CRYPT
-	EOF
-
-	touch $BOOTSTRAPPED
-fi
+cat <<-EOF > /etc/dovecot/conf.d/20-lmtp.conf
+protocol lmtp {
+	postmaster_address = $POSTMASTER
+}
+EOF
 
 exec dovecot -F -c /etc/dovecot/dovecot.conf

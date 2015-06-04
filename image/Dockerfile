@@ -8,6 +8,7 @@ ENV SLAPD_HOST ldap.example.com
 ENV SLAPD_SEARCH_BASE dc=example,dc=com
 ENV SLAPD_DN cn=dovecot,dc=example,dc=com
 ENV SLAPD_DNPASS pass
+ENV POSTMASTER postmaster@example.com
 
 RUN /build/prepare.sh && \
 	/build/services.sh && \
