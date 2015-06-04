@@ -31,6 +31,7 @@ if [ ! -e $BOOTSTRAPPED ]; then
 
 	cat <<-EOF > /etc/dovecot/conf.d/20-lmtp.conf
 	protocol lmtp {
+		mail_plugins = $mail_plugins sieve
 		postmaster_address = $POSTMASTER
 		hostname = $LMTP_HOSTNAME
 	}
