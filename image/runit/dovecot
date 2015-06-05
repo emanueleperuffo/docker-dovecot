@@ -4,6 +4,13 @@ set -e
 BOOTSTRAPPED="/mail/.bootstrapped"
 
 if [ ! -e $BOOTSTRAPPED ]; then
+	cat <<-EOF > /etc/dovecot/dovecot.conf
+	protocols = imap pop3 lmtp sieve
+	listen = *
+	login_trusted_networks = $LOGIN_TRUSTED_NETWORKS
+	!include conf.d/*.conf
+	EOF
+
 	cat <<-EOF > /etc/dovecot/dovecot-ldap.conf.ext
 	hosts = $SLAPD_HOST
 	auth_bind = no
