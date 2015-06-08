@@ -10,13 +10,18 @@ ENV SLAPD_DN cn=dovecot,dc=example,dc=com
 ENV SLAPD_DNPASS pass
 ENV POSTMASTER postmaster@example.com
 ENV LMTP_HOSTNAME dovecot.example.com
+ENV EXPUNGE_TRASH 30d
+ENV EXPUNGE_JUNK 30d
+ENV CRON_EXPUNGE_TRASH 30 0 * * *
+ENV CRON_EXPUNGE_JUNK 40 0 * * *
 
 RUN /build/prepare.sh && \
 	/build/services.sh && \
 	/build/cleanup.sh
 
-VOLUME ["/mail", "/etc/ssl/dovecot"]
+# /etc/ssl/dovecot
+VOLUME ["/mail"]
 
-EXPOSE 12345 143 110 4190 24
+EXPOSE 12345 143 4190 24
 
 CMD ["/sbin/my_init"]

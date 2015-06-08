@@ -1,50 +1,49 @@
 #!/bin/sh
 set -e
 
-BOOTSTRAPPED="/mail/.bootstrapped"
+cat <<-EOF > /etc/dovecot/dovecot.conf
+protocols = imap lmtp sieve
+listen = *
+login_trusted_networks = $LOGIN_TRUSTED_NETWORKS
+!include conf.d/*.conf
+EOF
 
-if [ ! -e $BOOTSTRAPPED ]; then
-	cat <<-EOF > /etc/dovecot/dovecot.conf
-	protocols = imap pop3 lmtp sieve
-	listen = *
-	login_trusted_networks = $LOGIN_TRUSTED_NETWORKS
-	!include conf.d/*.conf
-	EOF
+cat <<-EOF > /etc/dovecot/dovecot-ldap.conf.ext
+hosts = $SLAPD_HOST
+auth_bind = no
+dn = $SLAPD_DN
+dnpass = $SLAPD_DNPASS
+ldap_version = 3
+base = $SLAPD_SEARCH_BASE
+deref = never
+scope = subtree
+user_attrs = =home=/mail/%d/%n/, =uid=vmail, =gid=vmail
+user_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
+pass_attrs = mail=user,userPassword=password
+pass_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
+iterate_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient))
+default_pass_scheme = CRYPT
+EOF
 
-	cat <<-EOF > /etc/dovecot/dovecot-ldap.conf.ext
-	hosts = $SLAPD_HOST
-	auth_bind = no
-	dn = $SLAPD_DN
-	dnpass = $SLAPD_DNPASS
-	ldap_version = 3
-	base = $SLAPD_SEARCH_BASE
-	deref = never
-	scope = subtree
-	user_attrs = =home=/mail/%d/%n/, =uid=vmail, =gid=vmail
-	user_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
-	pass_attrs = mail=user,userPassword=password
-	pass_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient)(mail=%u))
-	iterate_filter = (&(objectclass=inetOrgPerson)(objectclass=inetLocalMailRecipient))
-	default_pass_scheme = CRYPT
-	EOF
+cat <<-EOF > /etc/dovecot/conf.d/15-lda.conf
+lda_mailbox_autocreate = yes
+protocol lda {
+	mail_plugins = $mail_plugins sieve
+	postmaster_address = $POSTMASTER
+}
+EOF
 
-	cat <<-EOF > /etc/dovecot/conf.d/15-lda.conf
-	lda_mailbox_autocreate = yes
-	protocol lda {
-		mail_plugins = $mail_plugins sieve
-		postmaster_address = $POSTMASTER
-	}
-	EOF
+cat <<-EOF > /etc/dovecot/conf.d/20-lmtp.conf
+protocol lmtp {
+	mail_plugins = $mail_plugins sieve
+	postmaster_address = $POSTMASTER
+	hostname = $LMTP_HOSTNAME
+}
+EOF
 
-	cat <<-EOF > /etc/dovecot/conf.d/20-lmtp.conf
-	protocol lmtp {
-		mail_plugins = $mail_plugins sieve
-		postmaster_address = $POSTMASTER
-		hostname = $LMTP_HOSTNAME
-	}
-	EOF
-
-	touch $BOOTSTRAPPED
-fi
+crontab - <<-EOF
+$CRON_EXPUNGE_TRASH /usr/local/bin/doveadm expunge -A mailbox Trash savedbefore $EXPUNGE_TRASH
+$CRON_EXPUNGE_JUNK /usr/local/bin/doveadm expunge -A mailbox Junk savedbefore $EXPUNGE_JUNK
+EOF
 
 exec dovecot -F -c /etc/dovecot/dovecot.conf
