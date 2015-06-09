@@ -4,10 +4,11 @@ MAINTAINER Emanuele Peruffo <info@emanueleperuffo.com>
 ENV HOME /root
 ADD . /build
 
-ENV SLAPD_HOST ldap.example.com
-ENV SLAPD_SEARCH_BASE dc=example,dc=com
-ENV SLAPD_DN cn=dovecot,dc=example,dc=com
-ENV SLAPD_DNPASS pass
+ENV LDAP_HOST ldap.example.com
+ENV LDAP_BASE_DN dc=example,dc=com
+ENV LDAP_BIND_DN cn=dovecot,dc=example,dc=com
+ENV LDAP_PASS pass
+
 ENV POSTMASTER postmaster@example.com
 ENV LMTP_HOSTNAME dovecot.example.com
 ENV EXPUNGE_TRASH 30d

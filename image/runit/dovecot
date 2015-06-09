@@ -9,12 +9,12 @@ login_trusted_networks = $LOGIN_TRUSTED_NETWORKS
 EOF
 
 cat <<-EOF > /etc/dovecot/dovecot-ldap.conf.ext
-hosts = $SLAPD_HOST
+hosts = $LDAP_HOST
 auth_bind = no
-dn = $SLAPD_DN
-dnpass = $SLAPD_DNPASS
+dn = $LDAP_BIND_DN
+dnpass = $LDAP_PASS
 ldap_version = 3
-base = $SLAPD_SEARCH_BASE
+base = $LDAP_BASE_DN
 deref = never
 scope = subtree
 user_attrs = =home=/mail/%d/%n/, =uid=vmail, =gid=vmail
